@@ -1,8 +1,7 @@
+h2 Alla #{session[:username]}'s aktiviteter!
 form action="/todos/new" method="POST"
     input type="text" name="content" placeholder="Namn på aktivitet"
     input type="submit" value="Skapa aktivitet"
-
-h2 Alla #{session[:username]}'s aktiviteter!
 
 - activities.each do |todo|
     p = activities["content"]

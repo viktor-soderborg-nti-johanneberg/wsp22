@@ -1,0 +1,8 @@
+main
+    p Du är inloggad som: #{session[:username]}
+    p Upplåsta milestones: 5
+    p = milestones
+    // Inner join för att få namnen på upplåsta milestones
+    // https://classroom.google.com/c/MzE5NjMzNDY0NzE4/m/MzE5NjMzOTUyNzQy/details
+    form action="/logout" method="post"
+        input type="submit" value="Logout"

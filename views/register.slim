@@ -1,5 +1,16 @@
-form action="users/new" method="POST"
-    input type="text" name="username" placeholder="Enter username"
-    input type="password" name="password" placeholder="Enter password"
-    input type="password" name="password_confirm" placeholder="Enter password again"
-    input type="submit" value="Registrera ny användare"
+main
+    h2 Register!
+    form class="none" action="users/new" method="POST"
+        label for="username"
+            |Username: 
+        input type="text" name="username" placeholder="Enter username"
+        br
+        label for="username"
+            |Password: 
+        input type="password" name="password" placeholder="Enter password"
+        br
+        label for="username"
+            |Password confirmation: 
+        input type="password" name="password_confirm" placeholder="Enter password again"
+        br
+        input type="submit" value="Registrera"

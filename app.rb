@@ -13,7 +13,14 @@ require 'bcrypt'
 #6. Lägg till felhantering (meddelande om man skriver in fel user/lösen)
 
 enable :sessions
-logged_in = true
+logged_in = false
+db = ""
+milestones = ""
+
+before do
+  db = SQLite3::Database.new('db/slutprojekt.db')
+  db.results_as_hash = true
+end
 
 get('/') do
   slim(:index, locals:{logged_in:logged_in})  
@@ -30,9 +37,7 @@ end
 post('/login') do
   username = params[:username]
   password = params[:password]
-  db = SQLite3::Database.new('db/todo.db')
-  db.results_as_hash = true
-  result = db.execute("SELECT * FROM users WHERE username = ?",username).first
+  result = db.execute("SELECT * FROM user WHERE username = ?",username).first
   pwdigest = result["pwdigest"]
   id = result["id"]
 
@@ -40,7 +45,7 @@ post('/login') do
     session[:id] = id
     session[:username] = username
     logged_in = true
-    redirect('/todos')
+    redirect('/')
   else
     logged_in = false
     "FEL LÖSENORD!"
@@ -49,24 +54,20 @@ end
 
 get('/activities') do
   id = session[:id].to_i
-  db = SQLite3::Database.new('db/todo.db')
-  db.results_as_hash = true
-  result = db.execute('SELECT * FROM todos WHERE user_id = ?',id)
+  result = db.execute('SELECT * FROM activities WHERE user_id = ?',id)
   p "Alla aktiviteter från result #{result}"
   slim(:"activities/index", locals:{activities:result, logged_in:logged_in})
 end
 
 post('/activities/:id/delete') do
   id = params[:id].to_i
-  db = SQLite3::Database.new('db/todo.db')
-  db.execute('DELETE FROM todos WHERE id = ?',id)
+  db.execute('DELETE FROM activities WHERE id = ?',id)
   redirect('/todos')
 end
 
 post('/activities/new') do
-  db = SQLite3::Database.new("db/todo.db")  
   content = params[:content]
-  db.execute("INSERT INTO todos (content, user_id) VALUES (?,?)",content, session[:id])
+  db.execute("INSERT INTO activities (content, user_id) VALUES (?,?)",content, session[:id])
   redirect('/todos')
 end
 
@@ -77,8 +78,7 @@ post('/users/new') do
 
   if password == password_confirm
     password_digest = BCrypt::Password.create(password)
-    db = SQLite3::Database.new('db/todo.db')
-    db.execute('INSERT INTO users (username,pwdigest) VALUES (?,?)',username,password_digest)
+    db.execute('INSERT INTO user (username,pwdigest) VALUES (?,?)',username,password_digest)
     redirect('/')
   else
     "Lösenorden matchade inte"
@@ -86,7 +86,8 @@ post('/users/new') do
 end
 
 get('/user') do
-  slim(:user, locals:{logged_in:logged_in, username:session[:username]})
+  result = db.execute('SELECT milestones.name FROM usermilerel INNER JOIN milestones ON usermilerel.milestone_id = milestone.id WHERE user_id = ?',session[:id])
+  slim(:"users/user", locals:{logged_in:logged_in, username:session[:username], milestones:result})
 end
 
 post('/logout') do

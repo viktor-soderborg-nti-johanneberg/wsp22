@@ -15,7 +15,6 @@ require 'bcrypt'
 enable :sessions
 logged_in = false
 db = ""
-milestones = ""
 
 before do
   db = SQLite3::Database.new('db/slutprojekt.db')
@@ -45,7 +44,7 @@ post('/login') do
     session[:id] = id
     session[:username] = username
     logged_in = true
-    redirect('/')
+    redirect('/activities')
   else
     logged_in = false
     "FEL LÖSENORD!"
@@ -54,21 +53,25 @@ end
 
 get('/activities') do
   id = session[:id].to_i
-  result = db.execute('SELECT * FROM activities WHERE user_id = ?',id)
-  p "Alla aktiviteter från result #{result}"
-  slim(:"activities/index", locals:{activities:result, logged_in:logged_in})
+  activities = db.execute('SELECT * FROM activities WHERE user_id = ?',id)
+  if logged_in
+    slim(:"activities/index", locals:{activities:activities, logged_in:logged_in})
+  else
+    slim(:error, locals:{activities:activities, logged_in:logged_in})
+  end
 end
 
 post('/activities/:id/delete') do
   id = params[:id].to_i
   db.execute('DELETE FROM activities WHERE id = ?',id)
-  redirect('/todos')
+  redirect('/activities')
 end
 
 post('/activities/new') do
-  content = params[:content]
-  db.execute("INSERT INTO activities (content, user_id) VALUES (?,?)",content, session[:id])
-  redirect('/todos')
+  name = params[:name]
+  hrs = params[:hrs]
+  db.execute("INSERT INTO activities (name, user_id, time) VALUES (?,?,?)",name, session[:id], hrs)
+  redirect('/activities')
 end
 
 post('/users/new') do
@@ -79,15 +82,21 @@ post('/users/new') do
   if password == password_confirm
     password_digest = BCrypt::Password.create(password)
     db.execute('INSERT INTO user (username,pwdigest) VALUES (?,?)',username,password_digest)
-    redirect('/')
+    logged_in = true
+    redirect('/activities')
   else
     "Lösenorden matchade inte"
   end
 end
 
 get('/user') do
-  result = db.execute('SELECT milestones.name FROM usermilerel INNER JOIN milestones ON usermilerel.milestone_id = milestone.id WHERE user_id = ?',session[:id])
-  slim(:"users/user", locals:{logged_in:logged_in, username:session[:username], milestones:result})
+  milestones = db.execute('SELECT * FROM usermilerel INNER JOIN milestones ON usermilerel.milestone_id = milestones.id WHERE user_id = ?',session[:id])
+  allmile = db.execute('SELECT * FROM milestones')
+  if logged_in
+    slim(:"users/user", locals:{logged_in:logged_in, username:session[:username], milestones:milestones, allmile:allmile})
+  else
+    slim(:error, locals:{logged_in:logged_in, username:session[:username], milestones:milestones, allmile:allmile})
+  end
 end
 
 post('/logout') do

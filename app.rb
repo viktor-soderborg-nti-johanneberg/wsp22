@@ -3,18 +3,13 @@ require 'slim'
 require 'sqlite3'
 require 'bcrypt'
 
-#1. Skapa ER + databas som kan hålla användare och todos. Fota ER-diagram, 
-#   lägg i misc-mapp
-#2. Skapa ett formulär för att registrerara användare.
-#3. Skapa ett formulär för att logga in. Om användaren lyckas logga  
-#   in: Spara information i session som håller koll på att användaren är inloggad
-#4. Låt inloggad användare skapa todos i ett formulär (på en ny sida ELLER på sidan som visar todos.).
-#5. Låt inloggad användare updatera och ta bort sina formulär.
-#6. Lägg till felhantering (meddelande om man skriver in fel user/lösen)
+# https://github.com/pure-css/pure/blob/master/site/static/layouts/marketing/index.html
+# https://purecss.io/layouts/marketing/
 
 enable :sessions
 logged_in = false
 db = ""
+admin = false
 
 before do
   db = SQLite3::Database.new('db/slutprojekt.db')
@@ -22,7 +17,7 @@ before do
 end
 
 get('/') do
-  slim(:index, locals:{logged_in:logged_in})  
+  slim(:index, locals:{logged_in:logged_in, admin:admin})
 end
 
 get('/register') do
@@ -39,11 +34,15 @@ post('/login') do
   result = db.execute("SELECT * FROM user WHERE username = ?",username).first
   pwdigest = result["pwdigest"]
   id = result["id"]
+  role = result["role"]
 
   if BCrypt::Password.new(pwdigest) == password
     session[:id] = id
     session[:username] = username
     logged_in = true
+    if role == "admin"
+      admin = true
+    end
     redirect('/activities')
   else
     logged_in = false
@@ -55,7 +54,7 @@ get('/activities') do
   id = session[:id].to_i
   activities = db.execute('SELECT * FROM activities WHERE user_id = ?',id)
   if logged_in
-    slim(:"activities/index", locals:{activities:activities, logged_in:logged_in})
+    slim(:"activities/index", locals:{activities:activities, logged_in:logged_in, admin:admin})
   else
     slim(:error, locals:{activities:activities, logged_in:logged_in})
   end
@@ -93,7 +92,7 @@ get('/user') do
   milestones = db.execute('SELECT * FROM usermilerel INNER JOIN milestones ON usermilerel.milestone_id = milestones.id WHERE user_id = ?',session[:id])
   allmile = db.execute('SELECT * FROM milestones')
   if logged_in
-    slim(:"users/user", locals:{logged_in:logged_in, username:session[:username], milestones:milestones, allmile:allmile})
+    slim(:"users/user", locals:{logged_in:logged_in, username:session[:username], milestones:milestones, allmile:allmile, admin:admin})
   else
     slim(:error, locals:{logged_in:logged_in, username:session[:username], milestones:milestones, allmile:allmile})
   end
@@ -103,4 +102,13 @@ post('/logout') do
   logged_in = false
   session.destroy
   redirect('/')
+end
+
+get('/admin') do
+  if logged_in && admin
+    users = db.execute('SELECT * FROM user')
+  slim(:admin, locals:{logged_in:logged_in, admin:admin, users:users})
+  else
+    slim(:error, locals:{logged_in:logged_in})
+  end
 end

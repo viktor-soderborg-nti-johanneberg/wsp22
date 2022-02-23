@@ -3,16 +3,22 @@ html lang="en"
   head
     meta charset="UTF-8"/
     meta name="viewport" content="width=device-width, initial-scale=1.0"/
+    link rel="stylesheet" href="https://purecss.io/layouts/marketing/styles.css"/
     link rel="stylesheet" href="/css/style.css"/
     title Slutprojekt WSP
   body
-    nav
-      a href="/" Home
+    nav class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed"
+      a class="pure-menu-heading" href="/" Home
       -if !logged_in
-        a href="/register" Register
-        a href="/showlogin" Login
+        a class="pure-menu-heading" href="/register" Register
+        a class="pure-menu-heading" href="/showlogin" Login
       -else
-        a href="/activities" Aktiviteter
-        a href="/user" #{session[:username]}
+        -if admin
+          a class="pure-menu-heading" href="/activities" Aktiviteter
+          a class="pure-menu-heading" href="/admin" Kontrollpanel
+          a class="pure-menu-heading" href="/user" #{session[:username]}
+        -else
+          a class="pure-menu-heading" href="/activities" Aktiviteter
+          a class="pure-menu-heading" href="/user" #{session[:username]}
 
     == yield

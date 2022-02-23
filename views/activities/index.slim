@@ -1,12 +1,15 @@
-h2 Alla #{session[:username]}'s aktiviteter!
+h2 class="content-head is-center" Alla #{session[:username]}'s aktiviteter!
 main.activities
-    form action="/activities/new" method="POST"
-        input type="text" name="name" placeholder="Namn på aktivitet"
-        input type="number" name="hrs" placeholder="Antal timmar"
+    form class="pure-form pure-form-stacked" action="/activities/new" method="POST"
+        label for="name" Namn på aktivitet
+        input type="text" name="name"
+        label for="hrs" Antal timmar
+        input type="number" name="hrs"
         input type="submit" value="Skapa aktivitet"
 
     - activities.each do |activity|
         article
-            p = activity["name"]
+            h3 class="content-subhead"
+                i class="fa fa-rocket" = activity["name"]
             form action="activities/#{activity['id']}/delete" method="POST"
                 input type="submit" value="Ta bort!"

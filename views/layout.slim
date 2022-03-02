@@ -7,18 +7,20 @@ html lang="en"
     link rel="stylesheet" href="/css/style.css"/
     title Slutprojekt WSP
   body
-    nav class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed"
-      a class="pure-menu-heading" href="/" Home
-      -if !logged_in
-        a class="pure-menu-heading" href="/register" Register
-        a class="pure-menu-heading" href="/showlogin" Login
-      -else
-        -if admin
-          a class="pure-menu-heading" href="/activities" Aktiviteter
-          a class="pure-menu-heading" href="/admin" Kontrollpanel
-          a class="pure-menu-heading" href="/user" #{session[:username]}
+    header
+      nav class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed"
+        a class="pure-menu-heading" href="/" Home
+        -if !logged_in
+          a class="pure-menu-heading" href="/register" Register
+          a class="pure-menu-heading" href="/showlogin" Login
         -else
-          a class="pure-menu-heading" href="/activities" Aktiviteter
-          a class="pure-menu-heading" href="/user" #{session[:username]}
+          -if admin
+            a class="pure-menu-heading" href="/activities" Aktiviteter
+            a class="pure-menu-heading" href="/admin" Kontrollpanel
+            a class="pure-menu-heading" href="/user/#{session[:id]}" #{session[:username]}
+          -else
+            a class="pure-menu-heading" href="/activities" Aktiviteter
+            a class="pure-menu-heading" href="/members" Members
+            a class="pure-menu-heading" href="/user/#{session[:id]}" #{session[:username]}
 
-    == yield
+  == yield

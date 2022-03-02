@@ -3,6 +3,8 @@ require 'slim'
 require 'sqlite3'
 require 'bcrypt'
 
+# Todo: milestones
+
 # https://github.com/pure-css/pure/blob/master/site/static/layouts/marketing/index.html
 # https://purecss.io/layouts/marketing/
 
@@ -73,6 +75,20 @@ post('/activities/new') do
   redirect('/activities')
 end
 
+post('/activities/:id/update') do
+  id = params[:id].to_i
+  name = params[:name]
+  time = params[:time]
+  db.execute("UPDATE activities SET name=?,time=? WHERE id =?",name,time,id)
+  redirect('/activities')
+end
+
+get('/activities/:id/edit') do
+  id = params[:id].to_i
+  result = db.execute("SELECT * FROM activities WHERE id = ?",id).first 
+  slim(:"/activities/edit", locals:{result:result, logged_in:logged_in, admin:admin})
+end
+
 post('/users/new') do
   username = params[:username]
   password = params[:password]
@@ -81,20 +97,21 @@ post('/users/new') do
   if password == password_confirm
     password_digest = BCrypt::Password.create(password)
     db.execute('INSERT INTO user (username,pwdigest) VALUES (?,?)',username,password_digest)
-    logged_in = true
-    redirect('/activities')
+    redirect('/')
   else
     "Lösenorden matchade inte"
   end
 end
 
-get('/user') do
-  milestones = db.execute('SELECT * FROM usermilerel INNER JOIN milestones ON usermilerel.milestone_id = milestones.id WHERE user_id = ?',session[:id])
+get('/user/:id') do
+  id = params[:id].to_i
+  user = db.execute('SELECT * FROM user WHERE id = ?', id).first
+  milestones = db.execute('SELECT * FROM usermilerel INNER JOIN milestones ON usermilerel.milestone_id = milestones.id WHERE user_id = ?',id)
   allmile = db.execute('SELECT * FROM milestones')
   if logged_in
-    slim(:"users/user", locals:{logged_in:logged_in, username:session[:username], milestones:milestones, allmile:allmile, admin:admin})
+    slim(:"users/user", locals:{logged_in:logged_in, username:user["username"], milestones:milestones, allmile:allmile, admin:admin, user:user})
   else
-    slim(:error, locals:{logged_in:logged_in, username:session[:username], milestones:milestones, allmile:allmile})
+    slim(:error, locals:{logged_in:logged_in, username:user["username"], milestones:milestones, allmile:allmile})
   end
 end
 
@@ -107,8 +124,23 @@ end
 get('/admin') do
   if logged_in && admin
     users = db.execute('SELECT * FROM user')
-  slim(:admin, locals:{logged_in:logged_in, admin:admin, users:users})
+    slim(:admin, locals:{logged_in:logged_in, admin:admin, users:users})
   else
     slim(:error, locals:{logged_in:logged_in})
   end
+end
+
+get('/members') do
+  if logged_in
+    users = db.execute('SELECT * FROM user')
+    slim(:"users/members", locals:{logged_in:logged_in, admin:admin, users:users})
+  else
+    slim(:error, locals:{logged_in:logged_in})
+  end
+end
+
+post('/users/:id/delete') do
+  id = params[:id].to_i
+  db.execute('DELETE FROM user WHERE id = ?', id)
+  redirect('/admin')
 end

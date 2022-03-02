@@ -1,2 +1,6 @@
 main class="splash"
-    h1 Välkommen!
+    - if !logged_in
+        h1 Välkommen främling!
+        h3 Logga in eller registrera dig för att sätta igång!
+    - else
+        h1 Välkommen #{session[:username]}!

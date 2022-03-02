@@ -1,29 +1,5 @@
-- users.each do |user|
-    p #{user["username"]} - #{user["role"]} 
-    input type="submit" value="Ta bort!"
-
-div class="content-wrapper"
-    div class="content"
-        h2 class="content-head is-center"Excepteur sint occaecat cupidatat.
-
-        div class="pure-g"
-            div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4"
-
-                h3 class="content-subhead"
-                    i class="fa fa-rocket" Get Started Quickly
-                
-                p Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
-            div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4"
-                h3 class="content-subhead"
-                    i class="fa fa-mobile"
-                    Responsive Layouts
-                p Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
-            div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4"
-                h3 class="content-subhead"
-                    i class="fa fa-th-large"
-                    Modular
-                p Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
-            div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4"
-                h3 class="content-subhead"
-                    i class="fa fa-check-square-o" Plays Nice
-                p Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
+main.activities
+    - users.each do |user|
+        p #{user["username"]} - #{user["role"].capitalize()}
+        form class="pure-form pure-form-stacked" action="users/#{user['id']}/delete" method="POST"
+            input type="submit" value="Ta bort!"

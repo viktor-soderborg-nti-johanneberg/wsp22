@@ -10,6 +10,7 @@ main.activities
     - activities.each do |activity|
         article
             h3 class="content-subhead"
-                i class="fa fa-rocket" = activity["name"]
-            form action="activities/#{activity['id']}/delete" method="POST"
+                i class="fa fa-rocket" = "#{activity["name"]} - #{activity["time"]} hrs"
+            a class="fa fa-rocket" href="activities/#{activity["id"]}/edit" Uppdatera
+            form class="pure-form pure-form-stacked" action="activities/#{activity['id']}/delete" method="POST"
                 input type="submit" value="Ta bort!"

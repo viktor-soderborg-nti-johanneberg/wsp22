@@ -1,0 +1,8 @@
+main.activities
+    form class="pure-form pure-form-stacked" action="/activities/#{result['id']}/update" method="post"
+        label for="name" Namn på aktivitet: 
+        input type="text" name="name" value="#{result['name']}"
+        label for="time" Antal timmar: 
+        input type="text" name="time" value="#{result["time"]}"
+        input type="hidden" name="id" value="#{result['id']}"
+        input type="submit" value="Uppdatera!"

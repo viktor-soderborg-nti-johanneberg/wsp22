@@ -1,5 +1,10 @@
 main.activities
     - users.each do |user|
-        p #{user["username"]} - #{user["role"].capitalize()}
+        a href="/user/#{user["id"]}" #{user["username"]} - #{user["role"].capitalize()}
         form class="pure-form pure-form-stacked" action="users/#{user['id']}/delete" method="POST"
+            label for="role" Välj en roll: 
+            select name="role"
+                option value="admin" Admin
+                option value="member" Member
+            input type="submit" formaction="users/#{user["id"]}/edit" formmedthod="POST" value="Uppdatera!"
             input type="submit" value="Ta bort!"

@@ -71,6 +71,9 @@ end
 post('/activities/new') do
   name = params[:name]
   hrs = params[:hrs]
+  if db.execute('SELECT * FROM activities WHERE user_id = ?', session[:id]).length == 0
+    db.execute('INSERT INTO usermilerel (user_id, milestone_id) VALUES (?,?)', session[:id], 1)
+  end
   db.execute("INSERT INTO activities (name, user_id, time) VALUES (?,?,?)",name, session[:id], hrs)
   redirect('/activities')
 end
@@ -96,7 +99,10 @@ post('/users/new') do
 
   if password == password_confirm
     password_digest = BCrypt::Password.create(password)
-    db.execute('INSERT INTO user (username,pwdigest) VALUES (?,?)',username,password_digest)
+    db.execute('INSERT INTO user (username,pwdigest,role) VALUES (?,?,?)',username,password_digest,"member")
+    session[:id] = db.execute('SELECT id FROM user WHERE username = ?', username).first["id"]
+    logged_in = true
+    session[:username] = username
     redirect('/')
   else
     "Lösenorden matchade inte"
@@ -142,5 +148,17 @@ end
 post('/users/:id/delete') do
   id = params[:id].to_i
   db.execute('DELETE FROM user WHERE id = ?', id)
+  redirect('/admin')
+end
+
+post('/users/:id/edit') do
+  id = params[:id].to_i
+  role = params[:role]
+  db.execute('UPDATE user SET role = ? WHERE id = ?', role, id)
+  if role == "admin"
+    admin = true
+  else
+    admin = false
+  end
   redirect('/admin')
 end

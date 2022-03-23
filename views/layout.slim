@@ -17,10 +17,10 @@ html lang="en"
           -if admin
             a class="pure-menu-heading" href="/activities" Aktiviteter
             a class="pure-menu-heading" href="/admin" Kontrollpanel
-            a class="pure-menu-heading" href="/user/#{session[:id]}" #{session[:username]}
+            a class="pure-menu-heading" href="/user/#{session[:id].first["id"]}" #{session[:username]}
           -else
             a class="pure-menu-heading" href="/activities" Aktiviteter
             a class="pure-menu-heading" href="/members" Members
-            a class="pure-menu-heading" href="/user/#{session[:id]}" #{session[:username]}
+            a class="pure-menu-heading" href="/user/#{session[:id].first["id"]}" #{session[:username]}
 
   == yield

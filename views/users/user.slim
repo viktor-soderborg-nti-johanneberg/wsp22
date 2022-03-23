@@ -6,6 +6,10 @@ main
         h3 class="content-subhead"
             i class="fa fa-rocket" #{milestone["name"]}
         p #{milestone["description"]}
-    - if user["id"] == session[:id]
+    label for="birthday" Födelsedag: 
+    form class="pure-form pure-form-stacked" action="/user/#{session[:id].first["id"]}/update" method="post"
+        input type="date" name="birthday"
+        input type="submit" value="Uppdatera profil!"
+    - if user["id"] == session[:id].first["id"]
         form class="pure-form pure-form-stacked" action="/logout" method="post"
             input type="submit" value="Logout"

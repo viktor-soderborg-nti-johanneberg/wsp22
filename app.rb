@@ -8,9 +8,10 @@ require_relative 'model.rb'
 
 #Test account: {Username: Bob, Password: 7}
 
+#cooldown vid inloggning
+
 enable :sessions
 logged_in = false
-db = ""
 admin = false
 
 get('/') do
@@ -36,10 +37,11 @@ end
 post('/login') do
   username = params[:username]
   password = params[:password]
-  if checkLogin(username)
-    session[:id] = id
+  if checkLogin(username, password)
+    session[:id] = getUserId(username)
     session[:username] = username
     logged_in = true
+    role = getRole(session[:id].first["id"]).first["role"]
     if role == "admin"
       admin = true
     end
@@ -51,9 +53,9 @@ post('/login') do
 end
 
 get('/activities') do
-  id = session[:id].to_i
-  activities = getActivities(id)
   if logged_in
+    id = session[:id].first["id"]
+    activities = getActivities(id)
     slim(:"activities/index", locals:{activities:activities, logged_in:logged_in, admin:admin})
   else
     slim(:login_error, locals:{activities:activities, logged_in:logged_in})
@@ -66,12 +68,12 @@ post('/activities/:id/delete') do
   redirect('/activities')
 end
 
-post('/activities/new') do
+post('/activities') do
   name = params[:name]
   time = params[:time]
-  milestones = getMilestones(session[:id])
-  updateMilestones(session[:id], time, milestones)
-  createActivity(name, session[:id], time)
+  milestones = getMilestones(session[:id].first["id"])
+  updateMilestones(session[:id].first["id"], time, milestones)
+  createActivity(name, session[:id].first["id"], time)
   redirect('/activities')
 end
 
@@ -79,8 +81,9 @@ post('/activities/:id/update') do
   id = params[:id].to_i
   name = params[:name]
   time = params[:time]
-  milestones = getMilestones(session[:id])
-  updateMilestones(session[:id], time, milestones)
+  updateActivity(name, time, id)
+  milestones = getMilestones(session[:id].first["id"])
+  updateMilestones(session[:id].first["id"], time, milestones)
   redirect('/activities')
 end
 
@@ -94,15 +97,17 @@ get('/activities/:id/edit') do
   end
 end
 
-post('/users/new') do
+post('/users') do
   username = params[:username]
   password = params[:password]
   password_confirm = params[:password_confirm]
 
   if password == password_confirm
-    session[:id] = registerUser(username, password)
+    registerUser(username, password)
+    session[:id] = getUserId(username)
     logged_in = true
     session[:username] = username
+    p admin
     redirect('/')
   else
     "Lösenorden matchade inte"
@@ -123,6 +128,7 @@ end
 
 post('/logout') do
   logged_in = false
+  admin = false
   session.destroy
   redirect('/')
 end
@@ -146,8 +152,8 @@ get('/members') do
 end
 
 post('/users/:id/delete') do
-  deleteUser(id)
   id = params[:id].to_i
+  deleteUser(id)
   redirect('/admin')
 end
 
@@ -155,14 +161,15 @@ post('/users/:id/edit') do
   id = params[:id].to_i
   role = params[:role]
   editUser(id, role)
-  if role == "admin"
-    admin = true
-  else
-    admin = false
-  end
   redirect('/admin')
 end
 
 get('/passerror') do
   slim(:wrong_password, locals:{logged_in:logged_in})
+end
+
+post('/user/:id/update') do
+  beginDate = params[:birthday]
+  endDate = Time.now
+  p endDate - beginDate
 end

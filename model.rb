@@ -1,19 +1,23 @@
 require 'sqlite3'
 require 'bcrypt'
 
-def checkLogin(username)
+def checkLogin(username, password)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     result = db.execute("SELECT * FROM user WHERE username = ?", username).first
     pwdigest = result["pwdigest"]
-    id = result["id"]
-    role = result["role"]
   
     if BCrypt::Password.new(pwdigest) == password
         return true
     else
         return false
     end
+end
+
+def createActivity(name, id, time)
+    db = SQLite3::Database.new('db/slutprojekt.db')
+    db.results_as_hash = true
+    db.execute("INSERT INTO activities (name, user_id, time) VALUES (?,?,?)", name, id, time)
 end
 
 def getActivities(id)
@@ -27,6 +31,18 @@ def deleteActivity(id)
     db.results_as_hash = true
     db.execute('DELETE FROM activities WHERE id = ?', id)
     return nil
+end
+
+def updateActivity(name, time, id)
+    db = SQLite3::Database.new('db/slutprojekt.db')
+    db.results_as_hash = true
+    db.execute("UPDATE activities SET name=?,time=? WHERE id =?", name, time, id)
+end
+
+def editActivity(id)
+    db = SQLite3::Database.new('db/slutprojekt.db')
+    db.results_as_hash = true
+    return db.execute("SELECT * FROM activities WHERE id = ?",id).first 
 end
 
 def getMilestones(id)
@@ -58,30 +74,12 @@ def updateMilestones(id, time, milestones)
     end
 end
 
-def createActivity(name, id, time)
-    db = SQLite3::Database.new('db/slutprojekt.db')
-    db.results_as_hash = true
-    db.execute("INSERT INTO activities (name, user_id, time) VALUES (?,?,?)", name, id, time)
-end
-
-def updateActivity(name, time, id)
-    db = SQLite3::Database.new('db/slutprojekt.db')
-    db.results_as_hash = true
-    db.execute("UPDATE activities SET name=?,time=? WHERE id =?", name, time, id)
-end
-
-def editActivity(id)
-    db = SQLite3::Database.new('db/slutprojekt.db')
-    db.results_as_hash = true
-    return db.execute("SELECT * FROM activities WHERE id = ?",id).first 
-end
-
 def registerUser(username, password)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     password_digest = BCrypt::Password.create(password)
     db.execute('INSERT INTO user (username,pwdigest,role) VALUES (?,?,?)',username,password_digest,"member")
-    return db.execute('SELECT id FROM user WHERE username = ?', username).first["id"]
+    return nil
 end
 
 def getUser(id)
@@ -112,12 +110,26 @@ def deleteUser(id)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('DELETE FROM user WHERE id = ?', id)
+    db.execute('DELETE FROM usermilerel WHERE user_id = ?', id)
+    db.execute('DELETE FROM activities WHERE user_id = ?', id)
     return nil
 end
 
-def editUser(id)
+def editUser(id, role)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('UPDATE user SET role = ? WHERE id = ?', role, id)
     return nil
+end
+
+def getUserId(username)
+    db = SQLite3::Database.new('db/slutprojekt.db')
+    db.results_as_hash = true
+    db.execute('SELECT id FROM user WHERE username = ?', username)
+end
+
+def getRole(id)
+    db = SQLite3::Database.new('db/slutprojekt.db')
+    db.results_as_hash = true
+    db.execute('SELECT role FROM user WHERE id = ?', id)
 end

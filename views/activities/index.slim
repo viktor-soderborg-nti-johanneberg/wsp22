@@ -1,6 +1,7 @@
 h2 class="content-head is-center" Alla #{session[:username]}'s aktiviteter!
 main.activities
-    form class="pure-form pure-form-stacked" action="/activities" method="POST"
+    p class="content-head is-center" Fält kan inte lämnas tomma
+    form class="pure-form pure-form-stacked" action="/activities" method="POST" required=true
         label for="name" Namn på aktivitet
         input type="text" name="name"
         label for="time" Antal timmar

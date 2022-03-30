@@ -1,6 +1,7 @@
 main
     h2 Register!
-    form class="none" action="users" method="POST"
+    p class="content-head is-center" Fält kan inte lämnas tomma
+    form class="none" action="users" method="POST" required=true
         label for="username"
             |Username: 
         input type="text" name="username" placeholder="Enter username"

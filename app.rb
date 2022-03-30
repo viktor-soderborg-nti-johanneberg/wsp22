@@ -1,7 +1,8 @@
 require 'sinatra'
 require 'slim'
 
-require_relative 'model.rb'
+require_relative './model/model.rb'
+include Model
 
 # https://github.com/pure-css/pure/blob/master/site/static/layouts/marketing/index.html
 # https://purecss.io/layouts/marketing/
@@ -71,6 +72,10 @@ end
 post('/activities') do
   name = params[:name]
   time = params[:time]
+  if name == "" || time == ""
+    p "error"
+    redirect('/activities')
+  end
   milestones = getMilestones(session[:id].first["id"])
   updateMilestones(session[:id].first["id"], time, milestones)
   createActivity(name, session[:id].first["id"], time)
@@ -89,9 +94,10 @@ end
 
 get('/activities/:id/edit') do
   id = params[:id].to_i
+  time = getDate(session[:id].first()["id"]).first()["birthday"]
   result = editActivity(id)
   if logged_in
-    slim(:"/activities/edit", locals:{result:result, logged_in:logged_in, admin:admin})
+    slim(:"/activities/edit", locals:{result:result, logged_in:logged_in, admin:admin, time:time})
   else
     slim(:login_error, locals:{result:result, logged_in:logged_in, admin:admin, username:session["username"]})
   end
@@ -102,12 +108,16 @@ post('/users') do
   password = params[:password]
   password_confirm = params[:password_confirm]
 
+  if username == "" || password == "" || password_confirm == ""
+    p "error"
+    redirect('/register')
+  end
+
   if password == password_confirm
     registerUser(username, password)
     session[:id] = getUserId(username)
     logged_in = true
     session[:username] = username
-    p admin
     redirect('/')
   else
     "Lösenorden matchade inte"
@@ -119,8 +129,14 @@ get('/user/:id') do
   user = getUser(id)
   milestones = showMilestones(id)
   allmile = allMilestones()
+  time = getDate(id).first()["birthday"]
+  if time != nil
+    date = Time.at(time).strftime('%Y-%m-%d')
+  else
+    date = nil
+  end
   if logged_in
-    slim(:"users/user", locals:{logged_in:logged_in, username:user["username"], milestones:milestones, allmile:allmile, admin:admin, user:user})
+    slim(:"users/user", locals:{logged_in:logged_in, username:user["username"], milestones:milestones, allmile:allmile, admin:admin, user:user, date:date})
   else
     slim(:login_error, locals:{logged_in:logged_in, username:user["username"], milestones:milestones, allmile:allmile})
   end
@@ -169,7 +185,11 @@ get('/passerror') do
 end
 
 post('/user/:id/update') do
-  beginDate = params[:birthday]
-  endDate = Time.now
-  p endDate - beginDate
+  id = params[:id].to_i
+  tmpDate = params[:birthday].split('-')
+  beginDate = Time.new(*tmpDate).to_f
+  endDate = Time.new.to_f
+  session[:time] = endDate - beginDate
+  updateBirthday(beginDate, id)
+  redirect("/user/#{id}")
 end

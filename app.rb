@@ -7,18 +7,23 @@ include Model
 # https://github.com/pure-css/pure/blob/master/site/static/layouts/marketing/index.html
 # https://purecss.io/layouts/marketing/
 
-#Test account: {Username: Bob, Password: 7}
+# Test account: {Username: Bob, Password: 7}
 
-#cooldown vid inloggning
+# cooldown vid inloggning
 
 enable :sessions
 logged_in = false
 admin = false
+login_attempts = 0
 
+# Display landing page
+#
 get('/') do
   slim(:index, locals:{logged_in:logged_in, admin:admin})
 end
 
+# Displays a register form
+#
 get('/register') do
   if logged_in
     slim(:logout_error, locals:{logged_in:logged_in, admin:admin})
@@ -27,6 +32,8 @@ get('/register') do
   end
 end
 
+# Displays a login form
+#
 get('/showlogin') do
   if logged_in
     slim(:logout_error, locals:{logged_in:logged_in, admin:admin})
@@ -35,6 +42,15 @@ get('/showlogin') do
   end
 end
 
+# Attempts login and update session
+#
+# @param username [String] The username
+# @param password [String] The password
+#
+# @see Model#checkLogin
+# @see Model#getUserId
+# @see Model#getRole
+#
 post('/login') do
   username = params[:username]
   password = params[:password]
@@ -49,10 +65,15 @@ post('/login') do
     redirect('/activities')
   else
     logged_in = false
+    login_attempts += 1
+    session[:last_login] = Time.now.to_f
     redirect('/passerror')
   end
 end
 
+# Displays a users activities
+#
+# @see Model#getActivities
 get('/activities') do
   if logged_in
     id = session[:id].first["id"]
@@ -63,11 +84,25 @@ get('/activities') do
   end
 end
 
+# Deletes an existing activity and redirects to '/activities'
+#
+# @param :id [Integer] the ID of the activity
+#
+# @see Model#deleteActivity
 post('/activities/:id/delete') do
   id = params[:id].to_i
   deleteActivity(id)
   redirect('/activities')
 end
+
+# Creates a new activity and redirects to '/activities' and updates user's milestones
+#
+# @param name [String] The name of the acitivity
+# @param time [Float] The time spent on activity
+#
+# @see Model#getMilestones
+# @see Model#updateMilestones
+# @see Model#createActivity
 
 post('/activities') do
   name = params[:name]
@@ -82,6 +117,15 @@ post('/activities') do
   redirect('/activities')
 end
 
+# Updates an existing activity and redirects to '/activities' and updates user's milestones
+#
+# @param :id [Integer] The ID of the activity
+# @param name [String] The new name of the activity
+# @param time [Float] The new time spent on activity
+#
+# @see Model#updateActivity
+# @see Model#getMilestones
+# @see Model#updateMilestones
 post('/activities/:id/update') do
   id = params[:id].to_i
   name = params[:name]
@@ -92,6 +136,12 @@ post('/activities/:id/update') do
   redirect('/activities')
 end
 
+# Displays update form for activity
+#
+# @param :id [Integer] the ID of the activity
+#
+# @see Model#getDate
+# @see Model#editActivity
 get('/activities/:id/edit') do
   id = params[:id].to_i
   time = getDate(session[:id].first()["id"]).first()["birthday"]
@@ -103,6 +153,14 @@ get('/activities/:id/edit') do
   end
 end
 
+# Attempts login and updates the session
+#
+# @param username [String] The username
+# @param password [String] The password
+# @param password_confirm [String] The repeated password
+#
+# @see Model#registerUser
+# @see Model#getUserId
 post('/users') do
   username = params[:username]
   password = params[:password]
@@ -124,6 +182,14 @@ post('/users') do
   end
 end
 
+# Displays a single user
+#
+# @param :id [Integer] the ID of the user
+#
+# @see Model#getUser
+# @see Model#showMilestones
+# @see Model#allMilestones
+# @see Model#getDate
 get('/user/:id') do
   id = params[:id].to_i
   user = getUser(id)
@@ -142,6 +208,8 @@ get('/user/:id') do
   end
 end
 
+# Attempts logut and destroys the session
+#
 post('/logout') do
   logged_in = false
   admin = false
@@ -149,6 +217,9 @@ post('/logout') do
   redirect('/')
 end
 
+# Displays admin panel
+#
+# @see Model#getUsers
 get('/admin') do
   if logged_in && admin
     users = getUsers()
@@ -158,6 +229,9 @@ get('/admin') do
   end
 end
 
+# Displays members list
+#
+# @see Model#getUsers
 get('/members') do
   if logged_in
     users = getUsers()
@@ -167,12 +241,23 @@ get('/members') do
   end
 end
 
+# Deletes an existing user and redirects to '/admin'
+#
+# @param :id [Integer] The ID of the user
+#
+# @see Model#deleteUser
 post('/users/:id/delete') do
   id = params[:id].to_i
   deleteUser(id)
   redirect('/admin')
 end
 
+# Updates an existing user and redirects to '/admin'
+#
+# @param :id [Integer] The ID of the user
+# @param role [String] The role of the user
+#
+# @see Model#editUser
 post('/users/:id/edit') do
   id = params[:id].to_i
   role = params[:role]
@@ -180,10 +265,18 @@ post('/users/:id/edit') do
   redirect('/admin')
 end
 
+# Displays an error message
+#
 get('/passerror') do
   slim(:wrong_password, locals:{logged_in:logged_in})
 end
 
+# Updates an existing user and redirects to '/user/:id'
+#
+# @param :id [Integer] The ID of the user
+# @param tmpDate [String] The birthday of the user
+#
+# @see Model#updateBirthday
 post('/user/:id/update') do
   id = params[:id].to_i
   tmpDate = params[:birthday].split('-')

@@ -4,11 +4,6 @@ require 'slim'
 require_relative './model/model'
 include Model
 
-# https://github.com/pure-css/pure/blob/master/site/static/layouts/marketing/index.html
-# https://purecss.io/layouts/marketing/
-
-# Test account: {Username: Bob, Password: 7}
-
 enable :sessions
 logged_in = false
 admin = false

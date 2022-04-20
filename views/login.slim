@@ -1,13 +1,16 @@
 main
     h2 Logga in!
     br
-    form class="none" action="login" method="POST"
-        label for="username"
-            |Username: 
-        input type="text" name="username" placeholder="Enter username"
-        br
-        label for="password"
-            |Password: 
-        input type="password" name="password" placeholder="Enter password"
-        br
-        input id="login" type="submit" value="Logga in"
+    -if session[:last_failed_login] && Time.now.to_i - session[:last_failed_login] < 5
+        h2 Vänta åtminstone 5 sekunder!
+    -else
+        form class="none" action="login" method="POST"
+            label for="username"
+                |Username: 
+            input type="text" name="username" placeholder="Enter username"
+            br
+            label for="password"
+                |Password: 
+            input type="password" name="password" placeholder="Enter password"
+            br
+            input id="login" type="submit" value="Logga in"

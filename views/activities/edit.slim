@@ -8,4 +8,7 @@ main.activities
         input type="hidden" name="id" value="#{result['id']}"
         input type="submit" value="Uppdatera!"
 
-    p Du har spenderat: #{((result["time"]*3600000)/time)*100}% av ditt liv på #{result['name']}
+    - dif_time_sec = (Time.new-Time.at(time)).to_i
+    - result_time_sec = result["time"]*3_600
+    p Utav #{dif_time_sec/3_600} timmar du har existerat har du spenderat:
+    p #{(result_time_sec/dif_time_sec.to_f*100).round(5)}% av ditt liv på #{result['name']}

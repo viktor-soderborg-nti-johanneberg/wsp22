@@ -9,7 +9,7 @@ module Model
   #
   # @return [false] if credentials do not match a user
   # @return [true] if credentials matches a user
-  def checkLogin(username, password)
+  def check_login(username, password)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     result = db.execute('SELECT * FROM user WHERE username = ?', username).first
@@ -28,7 +28,7 @@ module Model
   # @param [Integer] id The user_id of the user
   # @param [Integer] time The time spent on activity
   #
-  def createActivity(name, id, time)
+  def create_activity(name, id, time)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('INSERT INTO activities (name, user_id, time) VALUES (?,?,?)', name, id, time)
@@ -44,7 +44,7 @@ module Model
   #   * :user_id [Integer] The user_id of the user
   #   * :time [Integer] The time spent on activity
   #
-  def getActivities(id)
+  def get_activities(id)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('SELECT * FROM activities WHERE user_id = ?', id)
@@ -55,7 +55,7 @@ module Model
   # @param [Integer] id The id of the activity
   #
   # @return nil
-  def deleteActivity(id)
+  def delete_activity(id)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('DELETE FROM activities WHERE id = ?', id)
@@ -67,7 +67,7 @@ module Model
   # @param [String] name The name of the activity
   # @param [Integer] time The time spent on activity
   # @param [Integer] id The id of the activity
-  def updateActivity(name, time, id)
+  def update_activity(name, time, id)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('UPDATE activities SET name=?,time=? WHERE id =?', name, time, id)
@@ -83,7 +83,7 @@ module Model
   #   * :user_id [Integer] The user_id of the user
   #   * :time [Integer] The time spent on activity
   #
-  def editActivity(id)
+  def edit_activity(id)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('SELECT * FROM activities WHERE id = ?', id).first
@@ -97,7 +97,7 @@ module Model
   #   * :user_id [Integer] The ID of the user
   #   * :milestone_id [Integer] The ID of the milestone
   #
-  def getMilestones(id)
+  def get_milestones(id)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('SELECT * FROM usermilerel WHERE user_id = ?', id)
@@ -111,7 +111,7 @@ module Model
   # @option params [Integer] user_id The user_id of the user
   # @option params [Integer] milestone_id The id of the milestone
   #
-  def updateMilestones(id, time, milestones)
+  def update_milestones(id, time, milestones)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     if db.execute('SELECT * FROM activities WHERE user_id = ?', id).length == 0 && milestones.length < 1
@@ -140,7 +140,7 @@ module Model
   # @param [String] password The password
   #
   # @return nil
-  def registerUser(username, password)
+  def register_user(username, password)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     password_digest = BCrypt::Password.create(password)
@@ -159,7 +159,7 @@ module Model
   #   * :role [String] the role of the user
   #   * :birthday [Float] the miliseconds since 1st of January 1970 to user's birthday
   #
-  def getUser(id)
+  def get_user(id)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('SELECT * FROM user WHERE id = ?', id).first
@@ -168,7 +168,7 @@ module Model
   # Finds user's unlocked milestones
   #
   # @param [Integer] id The user_id of the user
-  def showMilestones(id)
+  def show_milestones(id)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute(
@@ -182,7 +182,7 @@ module Model
   #   * :id [Integer] the id of the milestone
   #   * :name [String] the name of the milestone
   #   * :descrption [String] the description of the milestone
-  def allMilestones
+  def all_milestones
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('SELECT * FROM milestones')
@@ -197,7 +197,7 @@ module Model
   #   * :role [String] the role of the user
   #   * :birthday [Float] the miliseconds since 1st of January 1970 to user's birthday
   #
-  def getUsers
+  def get_users
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('SELECT * FROM user')
@@ -208,7 +208,7 @@ module Model
   # @param [Integer] id The id of the user
   #
   # @return nil
-  def deleteUser(id)
+  def delete_user(id)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('DELETE FROM user WHERE id = ?', id)
@@ -223,7 +223,7 @@ module Model
   # param [String] role The role of the user
   #
   # return nil
-  def editUser(id, role)
+  def edit_user(id, role)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('UPDATE user SET role = ? WHERE id = ?', role, id)
@@ -233,7 +233,7 @@ module Model
   # Finds an ID of a user
   #
   # @param [String] username The username of the user
-  def getUserId(username)
+  def get_user_id(username)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('SELECT id FROM user WHERE username = ?', username)
@@ -242,7 +242,7 @@ module Model
   # Finds a role of a user
   #
   # @param [Integer] id The id of the user
-  def getRole(id)
+  def get_role(id)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('SELECT role FROM user WHERE id = ?', id)
@@ -252,7 +252,7 @@ module Model
   #
   # param [Float] date Seconds since 1st of January 1970 to user's birthday
   # param [Integer] id The user_id of the user
-  def updateBirthday(date, id)
+  def update_birthday(date, id)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('UPDATE user SET birthday = ? WHERE id = ?', date, id)
@@ -261,7 +261,7 @@ module Model
   # Finds a date of a user
   #
   # @param [Integer] id The user_id of the user
-  def getDate(id)
+  def get_date(id)
     db = SQLite3::Database.new('db/slutprojekt.db')
     db.results_as_hash = true
     db.execute('SELECT birthday FROM user WHERE id = ?', id)
